@@ -1,19 +1,17 @@
 package fr.clubnix.autumn;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
 
 import org.schwering.irc.lib.IRCConnection;
 
 public class Autumn extends Thread {
 
-	public Autumn(String host, int port, String pass, String nick, String user,
-			String name, boolean ssl) throws IOException {
+	public Autumn(Config config) throws IOException {
 
 		IRCConnection conn;
 
-		conn = new IRCConnection(host, new int[] { port }, pass, nick, user,  name);
+		conn = new IRCConnection(config.getHost(), new int[] { config.getPort() },
+				config.getPass(), config.getNick(), config.getUser(), config.getName());
 
 		conn.addIRCEventListener(new Listener(conn));
 		conn.setEncoding("UTF-8");
@@ -35,24 +33,11 @@ public class Autumn extends Thread {
 	}
 
 	public static void main(String[] args) {
-		Properties properties = new Properties();
-		try {
-			properties.load(new FileInputStream(args[0]));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Config config = ConfigLoader.load(args[0]);
 
-		String host = properties.getProperty("host");
-		int port = Integer.parseInt(properties.getProperty("port"));
-		String pass = properties.getProperty("pass");
-		String nick = properties.getProperty("nick");
-		String user = properties.getProperty("user");
-		String name = properties.getProperty("name");
-		boolean ssl = Boolean.parseBoolean(properties.getProperty("ssl"));
-
-		Autumn autumn = null;
+		Autumn autumn;
 		try {
-			autumn = new Autumn(host, port, pass, nick, user, name, ssl);
+			autumn = new Autumn(config);
 			autumn.start();
 		} catch (IOException e) {
 			e.printStackTrace();
